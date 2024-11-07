@@ -6,7 +6,12 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "outDir": "./dist",        // Compiled files will go here
+    "rootDir": "./src",         // Specify the root folder for your source code
+    "resolveJsonModule": true,  // If you import JSON files
+    "allowSyntheticDefaultImports": true  // Allows synthetic imports, useful for Node.js
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]  // Exclude these directories from compilation
 }

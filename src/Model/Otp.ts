@@ -1,29 +1,18 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../backends/database_con';
 
-const User = sequelize.define('User', {
-    username: {
-        type: DataTypes.STRING,
+const Otp = sequelize.define('Otp_verification', {
+    user_id: {
+        type: DataTypes.INTEGER,
         allowNull: false,
-        unique: true,
     },
     email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
     },
-    password: {
-        type: DataTypes.STRING,
+    Otp: {
+        type: DataTypes.INTEGER,
         allowNull: false,
-    },
-    is_verified: {
-        type: DataTypes.STRING,
-        defaultValue: 0,
-    },
-    roles:{
-        type: DataTypes.STRING,
-        allowNull: false,
-        defaultValue: 'user',
     },
     createdAt: {
         type: DataTypes.DATE,
@@ -44,4 +33,4 @@ const syncDatabase = async () => {
 
 syncDatabase();
 
-export default User; // User model ko export karein
+export default Otp;

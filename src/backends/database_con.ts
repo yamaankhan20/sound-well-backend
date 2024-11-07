@@ -1,11 +1,22 @@
-import mongoose from 'mongoose';
+import { Sequelize } from 'sequelize';
 
-const connectDB = async () => {
+// Database connection setup
+const sequelize = new Sequelize('sound-well', 'root', '', {
+    host: 'localhost',
+    dialect: 'mysql',
+});
+
+// Test the database connection
+const testConnection = async () => {
     try {
-        await mongoose.connect('mongodb://localhost:27017/chat-system');
+        await sequelize.authenticate();
+        console.log('Connected to MySQL database');
     } catch (error) {
+        console.error('Database connection error:', error);
         process.exit(1);
     }
 };
 
-export default connectDB;
+testConnection();
+
+export default sequelize;
