@@ -17,7 +17,7 @@ const sequelize = new Sequelize('thesoundwell-vibro-therapy-server', 'avfxmkkera
 const testConnection = async () => {
     try {
         await sequelize.authenticate();
-        console.log('Connected to MySQL database');
+        console.log('Connected to MySQL database successfully');
     } catch (error) {
         console.error('Database connection error:', error);
         process.exit(1);
