@@ -4,7 +4,7 @@ import Otp from '../../Model/Otp';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import speakeasy from 'speakeasy';
+import * as speakeasy from 'speakeasy';
 import sendOTPEmail from "../emails/OtpEmails";
 
 
@@ -12,17 +12,13 @@ dotenv.config();
 
 const router = Router();
 
-interface MongoError extends Error {
-    code?: number;
-    keyValue?: { email?: string; username?: string };
-}
 const generateToken = (email: string) => {
     return jwt.sign({ email: email }, process.env.JWT_SECRET as string, { expiresIn: '1d' });
 };
 
 const generate_otp = ()=> {
     const otp = speakeasy.totp({
-        secret: process.env.SPEAKEASY_SECRET,
+        secret : <string> process.env.SPEAKEASY_SECRET,
         encoding: 'base32'
     });
     return otp;
@@ -35,14 +31,7 @@ router.post('/register',async (req, res) => {
         password = await bcrypt.hash(password, saltRounds);
 
         const user = await Users.create({ username, email, password });
-        // const Send_otp = await Otp.create(
-        //     {
-        //         user_id: user.dataValues.id,
-        //         email: user.dataValues.email,
-        //         Otp: generate_otp()
-        //     });
-        //
-        // sendOTPEmail(user.dataValues.email, Send_otp.dataValues.Otp);
+
         res.status(201).json(
             {
                 // "id": user.dataValues.id,
@@ -51,8 +40,6 @@ router.post('/register',async (req, res) => {
         );
 
     } catch (error: any) {
-
-        const mongoError = error as MongoError;
 
         let errorMessage = 'An unknown error occurred.';
 
