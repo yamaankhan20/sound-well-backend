@@ -1,8 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import sequelize from './database_con';
-import userRoutes from '../backends/Routes/auth'; // Import your routes
+import userRoutes from './src/backends/Routes/auth'; // Import your routes
 import dotenv from 'dotenv';
 
 dotenv.config();

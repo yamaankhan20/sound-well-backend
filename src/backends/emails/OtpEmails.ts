@@ -13,7 +13,7 @@ async function sendOTPEmail(email: string, otp: string): Promise<void> {
     });
 
     const info = await transporter.sendMail({
-        from: `"OTP Service" ${process.env.EMAIL_USER}`,
+        from: `"Barcode Service" ${process.env.EMAIL_USER}`,
         to: email,
         subject: 'Your Barcode',
         text: `Your Barcode is: ${otp}`
