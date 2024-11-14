@@ -1,33 +1,51 @@
-import { DataTypes } from 'sequelize';
+// src/Model/Otp.ts
+import { DataTypes, Model } from 'sequelize';
 import sequelize from '../backends/database_con';
+import User from './Users';
 
-const Otp = sequelize.define('Otp_verification', {
-    user_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
+class Otp extends Model {}
+
+// Otp.belongsTo(User, {
+//     foreignKey: 'user_id',
+//     as: 'user',
+// });
+
+
+Otp.init(
+    {
+        user_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        email: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        Otp: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        createdAt: {
+            type: DataTypes.DATE,
+            defaultValue: DataTypes.NOW,
+        },
     },
-    email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    Otp: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    createdAt: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-    },
-}, {
-    timestamps: false,
-});
+    {
+        sequelize,
+        modelName: 'Otp_verification',  // Model name in the database
+        timestamps: false,
+    }
+);
+
+
+
 
 const syncDatabase = async () => {
     try {
         await sequelize.sync();
-        console.log('User model synced with database');
+        console.log('Models synced successfully');
     } catch (error) {
-        console.error('Error syncing database:', error);
+        console.error('Error syncing models:', error);
     }
 };
 

@@ -7,11 +7,20 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
-    "outDir": "./dist",        // Compiled files will go here
-    "rootDir": "./src",         // Specify the root folder for your source code
-    "resolveJsonModule": true,  // If you import JSON files
-    "allowSyntheticDefaultImports": true  // Allows synthetic imports, useful for Node.js
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "skipDefaultLibCheck": true,
+    "declaration": true,
+    "sourceMap": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]  // Exclude these directories from compilation
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

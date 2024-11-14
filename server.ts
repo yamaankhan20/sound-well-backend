@@ -1,8 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import sequelize from './database_con';
-import userRoutes from '../backends/Routes/auth'; // Import your routes
+import userRoutes from './src/backends/Routes/auth'; // Import your routes
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -13,7 +12,7 @@ const PORT = process.env.PORT || 3000;
 
 
 
-app.use(cors());
+app.use(cors({ origin: '*' }));
 app.use(bodyParser.json());
 app.use('/api', userRoutes);
 
