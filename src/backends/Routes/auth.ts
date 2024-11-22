@@ -3,6 +3,7 @@ import Users from '../../Model/Users';
 import Otp from '../../Model/Otp';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
+import * as speakeasy from 'speakeasy';
 import sendOTPEmail from "../emails/OtpEmails";
 import { randomBytes } from 'crypto';
 import { Op } from 'sequelize';
@@ -15,25 +16,21 @@ const router = Router();
 
 
 const generate_otp = ()=> {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'; // Letters and Numbers
-    let otp = '';
-
-    // Generate a random OTP of the specified length using crypto for secure randomness
-    for (let i = 0; i < 8; i++) {
-        const randomByte = randomBytes(1); // Get a random byte
-        const randomIndex = randomByte[0] % characters.length; // Get a value within the range of characters length
-        otp += characters.charAt(randomIndex); // Append random character to OTP string
-    }
-
+    const otp = speakeasy.totp({
+        secret : <string> process.env.SPEAKEASY_SECRET,
+        encoding: 'base32',
+        digits: 8
+    });
     return otp;
 }
 
 router.post('/register', async (req:any, res:any) => {
-    let { username, email, password } = req.body;
+    let { username, email } = req.body;
     const OTP = generate_otp();
 
     try {
-        password = 123465789;
+        const saltRounds = 10;
+        const password = 13456789;
 
         const user = await Users.create({ username, email, password });
 
@@ -46,7 +43,7 @@ router.post('/register', async (req:any, res:any) => {
         await Users.update({ is_verified: 0 }, { where: { id: user.dataValues.id } });
 
         return res.status(201).json({
-            message: 'User Registered successfully.',
+            message: 'Otp Generated successfully.',
             otp:OTP
         });
 
@@ -66,6 +63,46 @@ router.post('/register', async (req:any, res:any) => {
         return res.status(400).json({
             error_message: errorMessage,
         });
+    }
+});
+
+router.post('/user-login', async (req:any, res:any) => {
+    const { email, otp } = req.body;
+
+    try {
+        const user = await Users.findOne({ where: { email } });
+        if (!user) {
+            return res.status(404).json({ error_message: 'User not found.' });
+        }
+
+        const storedOtp = await Otp.findOne({
+            where: { user_id: user.dataValues.id,  },
+            order: [['createdAt', 'DESC']],
+        });
+        console.log(storedOtp);
+        if (!storedOtp) {
+            return res.status(400).json({ error_message: 'OTP not found or expired.' });
+        }
+
+        if (storedOtp.dataValues.Otp !== otp) {
+            return res.status(400).json({ error_message: 'Invalid Barcode.' });
+        }
+
+        const Auth_token = user.dataValues.email;
+
+
+        return res.status(200).json(
+            {
+                message: 'Login successful',
+                token: Auth_token,
+                role: 'user',
+            }
+        );
+
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error_message: 'An unknown error occurred.' });
     }
 });
 
@@ -104,44 +141,6 @@ router.post('/login', async (req, res) => {
         });
 });
 
-router.post('/user-login', async (req:any, res:any) => {
-    const { email, otp } = req.body;
-
-    try {
-        const user = await Users.findOne({ where: { email } });
-        if (!user) {
-            return res.status(404).json({ error_message: 'User not found.' });
-        }
-
-        const storedOtp = await Otp.findOne({
-            where: { user_id: user.dataValues.id },
-            order: [['createdAt', 'DESC']],
-        });        if (!storedOtp) {
-            return res.status(400).json({ error_message: 'OTP not found or expired.' });
-        }
-
-        if (storedOtp.dataValues.Otp !== otp) {
-            return res.status(400).json({ error_message: 'Invalid Barcode.' });
-        }
-
-        const Auth_token = user.dataValues.email;
-
-
-        return res.status(200).json(
-            {
-                message: 'Login successful',
-                token: Auth_token,
-                role: 'user',
-            }
-        );
-
-
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error_message: 'An unknown error occurred.' });
-    }
-});
-
 router.get('/verification/:id', (req: Request<{ id: string }, any, { otp: string }>, res: Response) => {
     const { id } = req.params;
     const { otp } = req.body;
@@ -178,7 +177,8 @@ router.get('/verification/:id', (req: Request<{ id: string }, any, { otp: string
 
 router.post('/resend-otp', async (req, res) => {
     const { id } = req.body;
-    const OTP  =generate_otp();
+    const OTP = generate_otp();
+
     Users.findOne({ where: { id } })
         .then(user => {
             if (!user) {
@@ -202,8 +202,7 @@ router.post('/resend-otp', async (req, res) => {
             console.error(err);
             return res.status(500).json({ error_message: 'An unknown error occurred.' });
         });
-})
-
+});
 router.get('/get-users', async (req, res) => {
     try {
         const all_users = await Users.findAll(
@@ -218,12 +217,17 @@ router.get('/get-users', async (req, res) => {
                     as: 'otps',
                     required: false,
                     order: [
-                        ['createdAt', 'DESC'],
+                        ['createdAt', 'DESC'],  // Order by createdAt to get the latest Otp
                     ],
                     limit: 1,
-                }
+                },
+                order: [
+
+                    ['createdAt', 'DESC'],
+                ]
             }
         );
+        console.log(all_users);
         res.status(200).json({"data": all_users});
     }catch(err) {
         console.error(err);
@@ -279,6 +283,7 @@ router.delete('/delete-user/:id', async (req:any, res:any) => {
         return res.status(500).json({ error_message: 'An error occurred while deleting the user.' });
     }
 });
+
 
 
 export default router;
